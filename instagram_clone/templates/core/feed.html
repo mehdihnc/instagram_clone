@@ -1,0 +1,100 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        {% for post in posts %}
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'profile' post.user.username %}" class="text-dark text-decoration-none">
+                            <strong>{{ post.user.username }}</strong>
+                        </a>
+                    </div>
+                </div>
+                
+                <img src="{{ post.image.url }}" class="card-img-top">
+                
+                <div class="card-body">
+                    <div class="mb-3">
+                        <button class="btn btn-link p-0 me-2 like-button" data-post-id="{{ post.id }}">
+                            <i class="fas fa-heart {% if request.user in post.likes.all %}text-danger{% endif %}"></i>
+                        </button>
+                        <span class="likes-count">{{ post.likes.count }}</span> likes
+                    </div>
+                    
+                    <p class="card-text">
+                        <strong>{{ post.user.username }}</strong> 
+                        {{ post.get_caption_with_hashtags }}
+                    </p>
+
+                    <div class="comments-section">
+                        {% for comment in post.comments.all|slice:":3" %}
+                        <p class="card-text">
+                            <strong>{{ comment.user.username }}</strong> {{ comment.text }}
+                        </p>
+                        {% endfor %}
+                    </div>
+                    
+                    <form class="comment-form" data-post-id="{{ post.id }}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Ajouter un commentaire...">
+                            <button class="btn btn-outline-primary" type="submit">Publier</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-md-8 text-center">
+            <h3>Aucune publication à afficher</h3>
+            <p>Commencez à suivre des utilisateurs pour voir leurs publications ici</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Gestion des likes
+    $('.like-button').click(function() {
+        const postId = $(this).data('post-id');
+        const button = $(this);
+        
+        $.post(`/like/${postId}/`, {
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        })
+        .done(function(data) {
+            button.find('i').toggleClass('text-danger');
+            button.siblings('.likes-count').text(data.likes_count);
+        });
+    });
+
+    // Gestion des commentaires
+    $('.comment-form').submit(function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const postId = form.data('post-id');
+        const input = form.find('input[type=text]');
+        
+        $.post(`/comment/${postId}/`, {
+            'text': input.val(),
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        })
+        .done(function(data) {
+            const commentHtml = `
+                <p class="card-text">
+                    <strong>${data.username}</strong> ${data.text}
+                </p>
+            `;
+            form.siblings('.comments-section').append(commentHtml);
+            input.val('');
+        });
+    });
+});
+</script>
+{% endblock %}

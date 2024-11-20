@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="text-center mb-4">Connexion</h2>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <input type="email" name="username" class="form-control" placeholder="Adresse email" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="password" class="form-control" placeholder="Mot de passe" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                    </form>
+
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-0">Vous n'avez pas de compte ?</p>
+                        <a href="{% url 'register' %}" class="btn btn-outline-primary mt-2">Créer un compte</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 10px;
+}
+.btn {
+    border-radius: 5px;
+}
+</style>
+{% endblock %} 

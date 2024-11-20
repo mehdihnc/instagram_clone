@@ -1,0 +1,29 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Supprimer votre compte</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <strong>Attention !</strong> Cette action est irréversible. Toutes vos données seront supprimées définitivement.
+                    </div>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Confirmez votre mot de passe</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Supprimer mon compte</button>
+                        <a href="{% url 'profile' user.username %}" class="btn btn-secondary">Annuler</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

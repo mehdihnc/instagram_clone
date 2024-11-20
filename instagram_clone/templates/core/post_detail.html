@@ -1,0 +1,97 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="row g-0">
+                <div class="col-md-8">
+                    <img src="{{ post.image.url }}" class="img-fluid">
+                </div>
+                <div class="col-md-4">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ post.user.profile_pic.url }}" class="rounded-circle me-2" style="width: 32px; height: 32px;">
+                            <a href="{% url 'profile' post.user.username %}" class="text-dark text-decoration-none">
+                                {{ post.user.username }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="post-content">
+                            <strong>{{ post.user.username }}</strong> {{ post.get_caption_with_hashtags }}
+                        </div>
+                        <div class="comments-section" style="height: 300px; overflow-y: auto;">
+                            {% for comment in post.comments.all %}
+                            <div class="comment mb-2">
+                                <p class="mb-1">
+                                    <strong>{{ comment.user.username }}</strong> {{ comment.text }}
+                                </p>
+                                <small class="text-muted">{{ comment.created_at|timesince }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-link like-button" data-post-id="{{ post.id }}">
+                                <i class="fas fa-heart {% if request.user in post.likes.all %}text-danger{% endif %}"></i>
+                            </button>
+                            <span class="likes-count">{{ post.likes.count }}</span> likes
+                        </div>
+                        <form class="comment-form mt-3" data-post-id="{{ post.id }}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Ajouter un commentaire...">
+                                <button class="btn btn-outline-primary" type="submit">Publier</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Même code JS que dans feed.html pour les likes et commentaires
+    $('.like-button').click(function() {
+        const postId = $(this).data('post-id');
+        const button = $(this);
+        
+        $.post(`/like/${postId}/`, {
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        })
+        .done(function(data) {
+            button.find('i').toggleClass('text-danger');
+            button.siblings('.likes-count').text(data.likes_count);
+        });
+    });
+
+    $('.comment-form').submit(function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const postId = form.data('post-id');
+        const input = form.find('input[type=text]');
+        
+        $.post(`/comment/${postId}/`, {
+            'text': input.val(),
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        })
+        .done(function(data) {
+            const commentHtml = `
+                <div class="comment mb-2">
+                    <p class="mb-1">
+                        <strong>${data.username}</strong> ${data.text}
+                    </p>
+                    <small class="text-muted">à l'instant</small>
+                </div>
+            `;
+            $('.comments-section').append(commentHtml);
+            input.val('');
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

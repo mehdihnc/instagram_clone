@@ -1,0 +1,83 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Explorer</h2>
+        </div>
+    </div>
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{% url 'profile' post.user.username %}" class="text-dark text-decoration-none">
+                            <strong>{{ post.user.username }}</strong>
+                        </a>
+                    </div>
+                    {% if request.user != post.user %}
+                    <button class="btn btn-sm follow-button {% if request.user in post.user.followers.all %}btn-secondary{% else %}btn-primary{% endif %}"
+                            data-username="{{ post.user.username }}">
+                        <span class="follow-text">
+                            {% if request.user in post.user.followers.all %}
+                                Abonné
+                            {% else %}
+                                Suivre
+                            {% endif %}
+                        </span>
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="position-relative">
+                    <a href="{% url 'post_detail' post.id %}" class="d-block">
+                        <img src="{{ post.image.url }}" class="img-fluid">
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <h3>Aucune publication disponible</h3>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('.follow-button').click(function() {
+        const button = $(this);
+        const username = button.data('username');
+        
+        $.post(`/follow/${username}/`, {
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        })
+        .done(function(data) {
+            // Mettre à jour tous les boutons pour cet utilisateur
+            const allUserButtons = $(`.follow-button[data-username="${username}"]`);
+            
+            if (data.following) {
+                allUserButtons.removeClass('btn-primary').addClass('btn-secondary');
+                allUserButtons.find('.follow-text').text('Abonné');
+            } else {
+                allUserButtons.removeClass('btn-secondary').addClass('btn-primary');
+                allUserButtons.find('.follow-text').text('Suivre');
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Erreur:', error);
+        });
+    });
+});
+</script>
+{% endblock %}
+
+<style>
+.overlay:hover {
+    opacity: 1 !important;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="{% url 'edit_profile' %}" class="list-group-item list-group-item-action">Modifier le profil</a>
+                <a href="{% url 'account_settings' %}" class="list-group-item list-group-item-action active">Paramètres du compte</a>
+                <a href="{% url 'delete_account' %}" class="list-group-item list-group-item-action text-danger">Supprimer le compte</a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Paramètres du compte</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Date d'inscription</label>
+                            <input type="text" class="form-control" value="{{ user.date_joined|date:'d/m/Y' }}" readonly>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

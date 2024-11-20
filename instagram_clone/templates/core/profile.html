@@ -1,0 +1,122 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-3 text-center">
+            <img src="{{ profile_user.profile_pic.url }}" class="rounded-circle" style="width: 150px; height: 150px;">
+        </div>
+        <div class="col-md-9">
+            <div class="d-flex align-items-center mb-3">
+                <h2 class="me-3">{{ profile_user.username }}</h2>
+                {% if request.user == profile_user %}
+                    <div class="btn-group">
+                        <a href="{% url 'edit_profile' %}" class="btn btn-outline-secondary">Modifier le profil</a>
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'account_settings' %}">Paramètres</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'delete_account' %}">Supprimer le compte</a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <button class="btn follow-button {% if request.user in profile_user.followers.all %}btn-secondary{% else %}btn-primary{% endif %}"
+                            data-username="{{ profile_user.username }}">
+                        <span class="follow-text">
+                            {% if request.user in profile_user.followers.all %}Abonné{% else %}Suivre{% endif %}
+                        </span>
+                    </button>
+                {% endif %}
+            </div>
+            <div class="d-flex mb-3 profile-stats">
+                <div class="me-4">
+                    <strong class="posts-count">{{ user_stats.posts_count }}</strong> publications
+                </div>
+                <div class="me-4">
+                    <strong class="followers-count">{{ user_stats.followers_count }}</strong> abonnés
+                </div>
+                <div class="me-4">
+                    <strong class="following-count">{{ user_stats.following_count }}</strong> abonnements
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-heart mb-2 text-danger"></i>
+                            <h6>J'aime reçus</h6>
+                            <strong>{{ user_stats.likes_received_count }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-comment mb-2 text-primary"></i>
+                            <h6>Commentaires</h6>
+                            <strong>{{ user_stats.comments_count }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-hashtag mb-2"></i>
+                            <h6>Hashtags utilisés</h6>
+                            <strong>{{ user_stats.total_hashtags }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'post_detail' post.id %}">
+                <img src="{{ post.image.url }}" class="img-fluid">
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <h3>Aucune publication</h3>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('.follow-button').click(function() {
+        const button = $(this);
+        const username = button.data('username');
+        
+        $.post(`/follow/${username}/`, {
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        })
+        .done(function(data) {
+            if (data.following) {
+                button.removeClass('btn-primary').addClass('btn-secondary');
+                button.text('Abonné');
+                // Met à jour uniquement le compteur d'abonnés
+                let followersElement = $('.profile-stats .followers-count');
+                let currentCount = parseInt(followersElement.text());
+                followersElement.text(currentCount + 1);
+            } else {
+                button.removeClass('btn-secondary').addClass('btn-primary');
+                button.text('Suivre');
+                // Met à jour uniquement le compteur d'abonnés
+                let followersElement = $('.profile-stats .followers-count');
+                let currentCount = parseInt(followersElement.text());
+                followersElement.text(currentCount - 1);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

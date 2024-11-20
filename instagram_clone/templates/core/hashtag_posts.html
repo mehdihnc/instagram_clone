@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>#{{ hashtag.name }}</h2>
+            <p>{{ posts.count }} publications</p>
+        </div>
+    </div>
+    <div class="row">
+        {% for post in posts %}
+        <div class="col-md-4 mb-4">
+            <div class="position-relative">
+                <a href="{% url 'post_detail' post.id %}" class="d-block">
+                    <img src="{{ post.image.url }}" class="img-fluid">
+                    <div class="overlay position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center" 
+                         style="background: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.3s;">
+                        <div class="text-white">
+                            <i class="fas fa-heart"></i> {{ post.likes.count }}
+                            <i class="fas fa-comment ms-3"></i> {{ post.comments.count }}
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <h3>Aucune publication avec ce hashtag</h3>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.overlay:hover {
+    opacity: 1 !important;
+}
+</style>
+{% endblock %} 

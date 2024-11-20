@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <form method="GET" class="search-form">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Rechercher un hashtag..." 
+                           value="{{ query }}">
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if query %}
+        <div class="row mb-4">
+            <div class="col">
+                <h3>Hashtags trouvés</h3>
+                {% for hashtag in hashtags %}
+                    <a href="{% url 'hashtag_posts' hashtag.name %}" class="btn btn-outline-primary me-2 mb-2">
+                        #{{ hashtag.name }}
+                        <span class="badge bg-secondary">{{ hashtag.posts.count }}</span>
+                    </a>
+                {% empty %}
+                    <p>Aucun hashtag trouvé pour "{{ query }}"</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <h3>Publications avec #{{ query }}</h3>
+                <div class="row">
+                    {% for post in posts %}
+                        <div class="col-md-4 mb-4">
+                            <a href="{% url 'post_detail' post.id %}">
+                                <img src="{{ post.image.url }}" class="img-fluid">
+                            </a>
+                        </div>
+                    {% empty %}
+                        <p>Aucune publication trouvée avec ce hashtag</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

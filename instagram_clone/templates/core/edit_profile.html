@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="{% url 'edit_profile' %}" class="list-group-item list-group-item-action active">Modifier le profil</a>
+                <a href="{% url 'account_settings' %}" class="list-group-item list-group-item-action">Paramètres du compte</a>
+                <a href="{% url 'delete_account' %}" class="list-group-item list-group-item-action text-danger">Supprimer le compte</a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Modifier le profil</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3 text-center">
+                            <img src="{{ user.profile_pic.url }}" class="rounded-circle mb-3" style="width: 120px; height: 120px;">
+                            <div class="mb-3">
+                                <label for="{{ form.profile_pic.id_for_label }}" class="form-label">Photo de profil</label>
+                                {{ form.profile_pic }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">Nom d'utilisateur</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.username.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.email.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+                            {{ form.bio }}
+                            {% if form.bio.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.bio.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('{{ form.profile_pic.id_for_label }}').addEventListener('change', function(e) {
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelector('.rounded-circle').src = e.target.result;
+        };
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+</script>
+{% endblock %} 
